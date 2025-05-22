@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log Tail SSE Demo</title>
+    <style>
+        body { font-family: monospace; background: #222; color: #eee; }
+        #log { white-space: pre-wrap; background: #111; padding: 1em; border-radius: 5px; max-height: 80vh; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Server Sent Events (SSE)</h1>
+    <h2>Monitoring Status</h2>
+    <div id="monitoring" style="width: 80vw; height: 5vh; margin: 0 auto;"></div><br /> <br />
+    <h2>Live Log Tail</h2>
+    <div id="log" style="width: 80vw; height: 65vh; margin: 0 auto;"></div>
+    <script>
+        const logDiv = document.getElementById('log');
+        const logEvtSource = new EventSource('http://127.0.0.1:8080/log/events');
+        logEvtSource.onmessage = function(event) {
+            logDiv.textContent += event.data + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+        logEvtSource.onerror = function() {
+            logDiv.textContent += "\n[Connection lost]\n";
+        };
+    </script>
+
+    <script>
+        const monitoringSpan = document.getElementById('monitoring');
+        const monitoringEvtSource = new EventSource('http://127.0.0.1:8080/monitoring/events');
+        monitoringEvtSource.onmessage = function(event) {
+            monitoringSpan.textContent = event.data;
+        };
+        monitoringEvtSource.onerror = function() {
+            monitoringSpan.textContent = "\n[Connection lost]\n";
+        };
+    </script>
+</body>
+</html>
